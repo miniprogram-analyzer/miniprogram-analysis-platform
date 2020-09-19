@@ -4,11 +4,26 @@ const Service = require('egg').Service;
 
 class UserService extends Service {
   async GetUserByNa(username) {
-    const user = await this.app.mysql.get('student_test', { username });
+    const user = await this.app.mysql.get('student_test',
+      {
+        where: { username }, // WHERE 条件
+        columns: [ 'id', 'email', 'phone' ], // 要查询的表字段
+      });
     if (!user) {
       return false;
     }
     return user;
+  }
+
+  async getUserByNameOrId(nameOrId) {
+    const userById = await this.app.mysql.get('student_test', { id: nameOrId });
+    const userByName = await this.app.mysql.get('student_test', { username: nameOrId });
+    const user = userById || userByName || {};
+    const { id, username } = user;
+    return {
+      id,
+      username
+    };
   }
 
   async VeriUserById(id) {
@@ -52,18 +67,6 @@ class UserService extends Service {
       return true;
     }
     return true;
-  }
-
-  async VeriUserByNaOrId(nameOrid, password) {
-    const userByname = await this.app.mysql.get('student_test', { username: nameOrid });
-    const userByid = await this.app.mysql.get('student_test', { id: nameOrid });
-    if (!userByname && !userByid) {
-      return false;
-    }
-    if((userByname && userByname.password === password)||(userByid && userByid.password === password)){
-      return true;
-    }
-    return false;
   }
 
   async GetLikeByNa(username, serial) {

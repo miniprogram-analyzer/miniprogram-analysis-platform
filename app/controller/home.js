@@ -1,18 +1,13 @@
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const Controller = require('egg').Controller;
-const fs = require('mz/fs');
 
 class HomeController extends Controller {
   async index() {
     const { ctx } = this;
     ctx.body = '你好, egg';
-  }
-
-  async remove_cookie() {
-    const ctx = this.ctx;
-    ctx.cookies.set('count', null);
-    ctx.status = 204;
   }
 
   async login() {
@@ -25,16 +20,21 @@ class HomeController extends Controller {
         successFlag: 'N',
         errorMsg: '用户名不存在或者密码错误',
       };
-    } else {
-      let count = ctx.cookies.get('count');
-      count = count ? Number(count) : 0;
-      ctx.cookies.set('count', ++count);
-      ctx.body = {
-        successFlag: 'Y',
-        errorMsg: '登录成功！',
-	//msg:count,
-      };
+      return;
     }
+
+    const userInfo = await ctx.service.user.getUserByNameOrId(nameOrid);
+    console.log(userInfo);
+
+    // auth: boolean 判断用户登录状态
+    ctx.session.auth = true;
+    ctx.body = {
+      successFlag: 'Y',
+      errorMsg: '登录成功！',
+      data: {
+        userInfo
+      }
+    };
   }
 
   async register() {
@@ -67,6 +67,8 @@ class HomeController extends Controller {
         if (updateSuccess) {
           console.log('更新成功');
         }
+
+        ctx.session.auth = true;
       } else {
         ctx.body = {
           successFlag: 'N',
@@ -76,9 +78,28 @@ class HomeController extends Controller {
     }
   }
 
-  async get_list(t) {
-    const list = await this.service.news.GetList(t);
+  async log_out() {
     const { ctx } = this;
+
+    ctx.session = null;
+    
+    ctx.status = 204;
+  }
+
+  async get_list() {
+    const { ctx } = this;
+    let { option, isentire, serial, size } = ctx.request.body;
+    if(option !== 1 || option !== 2){
+      ctx.body = {        
+	successFlag: 'N',
+        errorMsg: '请求格式有误！',
+      };
+      return;
+    }
+    if(!isentire) isentire = 1;
+    if (!serial) serial = 1;
+    if (!size) size = 10;
+    const list = await this.service.news.GetList(option, isentire, serial, size);
     const msg = list;
     ctx.body = { code: 1, msg };
   }
@@ -159,26 +180,26 @@ class HomeController extends Controller {
       console.log('encoding: ' + file.encoding);
       console.log('mime: ' + file.mime);
       console.log('tmp filepath: ' + file.filepath);
-      try {
-        // process file or upload to cloud storage
-        // 读取文件
-        // let file = fs.readFileSync(file.filepath) // files[0]表示获取第一个文件，若前端上传多个文件则可以遍历这个数组对象
-        // 将文件存到指定位置
-        fs.writeFileSync(path.join('./', file.filename), file);
-        // ctx.cleanupRequestFiles()
-      } finally {
-        // remove tmp files and don't block the request's response
-        // cleanupRequestFiles won't throw error even remove file io error happen
-        ctx.cleanupRequestFiles([ file ]);
+      if(!file.filename){
+        ctx.body = {
+          successFlag: 'N',
+          errorMsg: '上传失败！',
+        };
+      } else {
+        ctx.body = {
+          successFlag: 'Y',
+          errorMsg: '上传成功！',
+        };
       }
-      // console.log(result);
+      fs.writeFileSync(path.join('./', file.filename), file);
     }
   }
 
-  async get_userinfo() {
+  async get_user_info() {
     const ctx = this.ctx;
     const { username } = ctx.request.body;
-	  console.log(username);
+    //测试用
+    //console.log(username);
     const info = await ctx.service.user.GetUserByNa(username);
 
     if (!info) {
@@ -227,6 +248,47 @@ class HomeController extends Controller {
       };
     }
   }
+
+  async modify_user_info() {
+    const ctx = this.ctx;
+    const { nameOrid, password, choice, replacement }  = ctx.request.body;
+    const VeriUser = await ctx.service.user.VeriUserByNaOrId(nameOrid, password);
+
+    if (!VeriUser) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '密码错误',
+      };
+      return;
+    }
+
+    var id = 0;
+    if(Number(nameOrid) === nameOrid) id = nameOrid;
+    else {
+      const user = await ctx.service.user.GetUserByNa(nameOrid);
+      id = user.id;
+    }
+    let row = '';
+    if(choice === 'password') {
+      row = {
+	id,
+      	password:replacement,
+      };
+    }
+    else{
+      row = {
+        id,
+        email:replacement,
+      };
+    }
+	  
+    const result = await this.app.mysql.update('student_test', row);// 更新 student_test 表中的记录
+
+    // 判断更新成功
+    const updateSuccess = result.affectedRows === 1;
+    if (updateSuccess) { console.log('更新成功'); }
+  }
+
 }
 
 module.exports = HomeController;
