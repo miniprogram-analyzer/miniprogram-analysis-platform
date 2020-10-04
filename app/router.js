@@ -20,4 +20,11 @@ module.exports = app => {
   router.post('/api/getLikenum', controller.home.get_like_num);
   router.post('/api/like', controller.home.like);
   router.post('/api/modifyUserinfo', controller.home.modify_user_info);
+  router.post('/api/getReplyorComment', controller.home.get_reply_or_comment);
+  router.post('/api/submitComment', controller.home.submit_comment);
+  router.post('/api/submitReply', controller.home.submit_reply);
+  router.post('/api/getUserinteract', controller.home.get_user_interact);
+  router.post('/api/submitFeedback', controller.home.submit_feedback);
+  router.post('/api/printList', controller.home.print_list);
+  router.post('/api/uploadPicture', controller.home.upload_picture);
 };

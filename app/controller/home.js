@@ -1,8 +1,9 @@
-'use strict';
+'strict';
 
 const fs = require('fs');
 const path = require('path');
 const Controller = require('egg').Controller;
+
 
 class HomeController extends Controller {
   async index() {
@@ -89,14 +90,20 @@ class HomeController extends Controller {
   async get_list() {
     const { ctx } = this;
     let { option, isentire, serial, size } = ctx.request.body;
-    if(option !== 1 || option !== 2){
-      ctx.body = {        
-	successFlag: 'N',
-        errorMsg: '请求格式有误！',
-      };
-      return;
+    if(option){
+      console.log(typeof(option));
+      if(typeof(option) == 'string')
+          [option, isentire, serial, size] = [Number(JSON.parse(option)), Number(JSON.parse(isentire)), JSON.parse(Number(serial)), Number(JSON.parse(size))];
+      console.log(typeof(option));
+      if( option !== 1 && option !== 2){
+        ctx.body = {        
+	  successFlag: 'N',
+          errorMsg: '请求格式有误！',
+        };
+        return;
+      }
     }
-    if(!isentire) isentire = 1;
+    if(!isentire && isentire !== 0) isentire = 1;
     if (!serial) serial = 1;
     if (!size) size = 10;
     const list = await this.service.news.GetList(option, isentire, serial, size);
@@ -195,6 +202,52 @@ class HomeController extends Controller {
     }
   }
 
+  async upload_picture() {
+    const { ctx } = this;
+    const { id } = ctx.request.body; 
+    console.log(ctx.request.body);
+    console.log('got %d files', ctx.request.files.length);
+    for (const file of ctx.request.files) {
+      console.log('field: ' + file.fieldname);
+      console.log('filename: ' + file.filename);
+      console.log('encoding: ' + file.encoding);
+      console.log('mime: ' + file.mime);
+      console.log('tmp filepath: ' + file.filepath);
+      if (!file.filename) {
+        ctx.body = {
+          successFlag: 'N',
+          errorMsg: '上传失败！',
+        };
+      } else {
+        ctx.body = {
+          successFlag: 'Y',
+          errorMsg: '上传成功！',
+        };
+      }
+      fs.writeFileSync(path.join('./', file.filename,'binary'), file);
+    let address = '';
+    let serial = 0;
+    const list = await this.app.mysql.select('picture_address',
+      {
+        where: {
+          id,
+        }, // WHERE 条件
+      });
+    serial = 1 + list.length;
+    const row = {
+      serial,
+      id,
+      address,
+    };
+
+    const result = await this.app.mysql.insert('picture_address', row); // 在 picture_address 表中，插入记录
+
+    // 判断插入成功
+    const insertSuccess = result.affectedRows === 1;
+    if (insertSuccess) console.log('记录成功');
+    }
+  }
+
   async get_user_info() {
     const ctx = this.ctx;
     const { username } = ctx.request.body;
@@ -249,46 +302,188 @@ class HomeController extends Controller {
     }
   }
 
-  async modify_user_info() {
+  async get_user_interact() {
     const ctx = this.ctx;
-    const { nameOrid, password, choice, replacement }  = ctx.request.body;
-    const VeriUser = await ctx.service.user.VeriUserByNaOrId(nameOrid, password);
-
-    if (!VeriUser) {
+    const { id, choice } = ctx.request.body;
+    let list = '';
+    if (choice === 'comment') list = await this.service.user.GetCommentById(id);
+    else if (choice === 'reply') list = await this.service.user.GetReplyById(id);
+    else {
       ctx.body = {
         successFlag: 'N',
-        errorMsg: '密码错误',
+        errorMsg: '输入格式有误,获取失败!',
       };
       return;
     }
-
-    var id = 0;
-    if(Number(nameOrid) === nameOrid) id = nameOrid;
-    else {
-      const user = await ctx.service.user.GetUserByNa(nameOrid);
-      id = user.id;
-    }
-    let row = '';
-    if(choice === 'password') {
-      row = {
-	id,
-      	password:replacement,
+    if (!list) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '获取失败!',
       };
+      return;
     }
-    else{
-      row = {
-        id,
-        email:replacement,
-      };
-    }
-	  
-    const result = await this.app.mysql.update('student_test', row);// 更新 student_test 表中的记录
-
-    // 判断更新成功
-    const updateSuccess = result.affectedRows === 1;
-    if (updateSuccess) { console.log('更新成功'); }
+    const msg = list;
+    ctx.body = {
+      successFlag: 'Y',
+      errorMsg: '获取成功！',
+      msg,
+    };
   }
 
+  async submit_comment() {
+    const ctx = this.ctx;
+    const { partition, formerserial, content, guestid } = ctx.request.body;
+    const probe = await this.service.news.GetIdFormDiscuss(partition, formerserial);
+    if (!probe) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '非法格式,提交失败!',
+      };
+      return;
+    }
+    const mark = await this.service.news.GetSerialFormComment();
+    const row = {
+      serial: mark + 1,
+      partition,
+      formerserial,
+      hostid: probe,
+      content,
+      guestid,
+    };
+
+    const result = await this.app.mysql.insert('comment', row); // 在 comment 表中，插入记录
+
+    // 判断插入成功
+    const insertSuccess = result.affectedRows === 1;
+    if (insertSuccess) {
+      ctx.body = {
+        successFlag: 'Y',
+        errorMsg: '提交成功！',
+      };
+    }
+  }
+
+  async submit_reply() {
+    const ctx = this.ctx;
+    const { partition, formerserial, content, guestid } = ctx.request.body;
+    const probe = await this.service.news.GetIdFormComment(partition, formerserial);
+    if (!probe) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '非法格式,提交失败!',
+      };
+      return;
+    }
+    const mark1 = await this.service.news.GetSerialFormReply();
+    const mark2 = await this.service.news.GetFloorFormReply(partition, formerserial);
+    const row = {
+      serial: mark1 + 1,
+      partition,
+      formerserial,
+      floor: mark2,
+      hostid: probe,
+      content,
+      guestid,
+    };
+
+    const result = await this.app.mysql.insert('reply', row); // 在 reply 表中，插入记录
+
+    // 判断插入成功
+    const insertSuccess = result.affectedRows === 1;
+    if (insertSuccess) {
+      ctx.body = {
+        successFlag: 'Y',
+        errorMsg: '提交成功！',
+      };
+    }
+  }
+
+  async get_reply_or_comment() {
+    const ctx = this.ctx;
+    const { choice, partition, formerserial } = ctx.request.body;
+    let list = '';
+    if (choice === 'comment') list = await this.service.news.GetComment(partition, formerserial);
+    else if (choice === 'reply') list = await this.service.news.GetReply(partition, formerserial);
+    else {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '输入格式有误,获取失败!',
+      };
+      return;
+    }
+    if (!list) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '获取失败!',
+      };
+      return;
+    }
+    const msg = list;
+    ctx.body = {
+      successFlag: 'Y',
+      errorMsg: '获取成功！',
+      msg,
+    };
+  }
+
+  async submit_feedback() {
+    const ctx = this.ctx;
+    const { id, about, content } = ctx.request.body;
+    const mark = await ctx.service.news.GetLengthOfFeedback();
+    if (!mark) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '记录添加失败！',
+      };
+    }
+    const row = {
+      serial: mark + 1,
+      id,
+      about,
+      content,
+    };
+
+    const result = await this.app.mysql.insert('feedback', row); // 在 feedback 表中，插入记录
+
+    // 判断插入成功
+    const insertSuccess = result.affectedRows === 1;
+    if (insertSuccess) {
+      ctx.body = {
+        successFlag: 'Y',
+        errorMsg: '记录添加成功！',
+        // console.log('更新成功');
+      };
+    }
+  }
+
+  async print_list() {
+    const { ctx } = this;
+    const { choice } = ctx.request.body;
+    let database = '';
+    if (choice === 'discuss') database = 'discuss_list';
+    else if (choice === 'share') database = 'share_list';
+    else {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '输入格式有误,获取失败!',
+      };
+      return;
+    }
+    const list = await this.service.news.GetList2(database);
+    if (!list) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '获取失败!',
+      };
+      return;
+    }
+    const msg = list;
+    ctx.body = {
+      successFlag: 'Y',
+      errorMsg: '获取成功！',
+      msg,
+    };
+  }
 }
 
 module.exports = HomeController;

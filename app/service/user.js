@@ -4,7 +4,7 @@ const Service = require('egg').Service;
 
 class UserService extends Service {
   async GetUserByNa(username) {
-    const user = await this.app.mysql.get('student_test',
+    const user = await this.app.mysql.select('student_test',
       {
         where: { username }, // WHERE 条件
         columns: [ 'id', 'email', 'phone' ], // 要查询的表字段
@@ -33,14 +33,14 @@ class UserService extends Service {
     }
     return true;
   }
-
+  
   async VeriUserByNaOrId(nameOrid, password) {
     const userByname = await this.app.mysql.get('student_test', { username: nameOrid });
     const userByid = await this.app.mysql.get('student_test', { id: nameOrid });
-    if (!userByname || userByname.password !== password) {
+    if (!userByname && !userByid) {
       return false;
     }
-    if (!userByid || userByid.password !== password) {
+    if ((!userByname || userByname.password !== password)&&(!userByid || userByid.password !== password)) {
       return false;
     }
     return true;
@@ -122,6 +122,37 @@ class UserService extends Service {
     if (updateSuccess) return true;
     return false;
   }
+
+  async GetComment(partition, formerserial) {
+    const message = await this.app.mysql.select('comment',
+      {
+        where: {
+          partition,
+          formerserial,
+        }, // WHERE 条件
+        columns: [ 'serial', 'content', 'time', 'guestid' ], // 要查询的表字段
+      });
+    if (!message) {
+      return false;
+    }
+    return message;
+  }
+
+  async GetReply(partition, formerserial) {
+    const message = await this.app.mysql.select('reply',
+      {
+        where: {
+          partition,
+          formerserial,
+        }, // WHERE 条件
+        columns: [ 'serial', 'floor', 'content', 'time', 'guestid' ], // 要查询的表字段
+      });
+    if (!message) {
+      return false;
+    }
+    return message;
+  }
 }
+
 module.exports = UserService;
 
