@@ -31,16 +31,21 @@ module.exports = appInfo => {
     },
   };
 
+  config.bodyParser = {
+    jsonLimit: '1mb',
+  };
+
   config.security = {
     csrf: {
       enable: false,
       ignoreJSON: true,
     },
-    domainWhiteList: [ '*' ],
+	  domainWhiteList: ['http://localhost:8081', 'http://localhost:9527', 'http://122.51.210.8', 'http://code.f00bar.top', 'http://bupt-c607.cn' ],
   };
 
   config.cors = {
-    origin: '*', // 匹配规则  域名+端口  *则为全匹配
+    // origin: '*', // 匹配规则  域名+端口  *则为全匹配
+    credentials: true,
     allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH',
   };
 
@@ -82,7 +87,7 @@ module.exports = appInfo => {
     cleanSchedule: {
       cron: '0 30 4 * * *',
     },
-    whitelist: [ '.png', '.jpg', '.jpeg', '.gif' ], // 扩展几种上传的文件格式
+    whitelist: [ '.png', '.jpg', '.jpeg', '.gif', '.zip', '.gz', '.bz2', '.tar.gz' ], // 扩展几种上传的文件格式
   };
 
   return {
