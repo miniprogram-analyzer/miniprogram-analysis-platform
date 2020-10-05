@@ -1,10 +1,10 @@
-# example
+# Code-analysis-platform
 
+## Intro
 
+[微信小程序代码分析平台/试剑亭](http://daima.icu)
 
 ## QuickStart
-
-<!-- add docs here for user -->
 
 see [egg docs][egg] for more detail.
 
