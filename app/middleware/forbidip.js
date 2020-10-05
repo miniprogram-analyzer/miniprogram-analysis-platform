@@ -1,39 +1,30 @@
-'use strict';
+'use strict'
 
 module.exports = (options, app) => {
-
-  return async function forbidip(ctx, next) {
-
+  return async function forbidip (ctx, next) {
     // 要屏蔽的ip地址
-    const forbidips = options.forbidips;
+    const forbidips = options.forbidips
 
     // 获取客户端ip
     // console.log(forbidips);
 
-    const clientip = ctx.request.ip;
+    const clientip = ctx.request.ip
 
-    const hasip = forbidips.some(function(val) {
-
+    const hasip = forbidips.some(function (val) {
       if (val === clientip) {
-
-        return true;
+        return true
       }
-      return false;
-
-    });
+      return false
+    })
     if (hasip) {
-      ctx.status = 403;
+      ctx.status = 403
 
-      ctx.body = '您的ip已经被屏蔽';
-
+      ctx.body = '您的ip已经被屏蔽'
     } else {
-      await next();
+      await next()
     }
     // if (ctx.request.ip == forbidip) {
 
-
     // }
-
-  };
-};
-
+  }
+}

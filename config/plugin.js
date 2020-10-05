@@ -1,21 +1,21 @@
-'use strict';
+'use strict'
 
 /** @type Egg.EggPlugin */
 module.exports = {
   // had enabled by egg
   static: {
-    enable: true,
+    enable: true
   },
   ejs: {
     enable: true,
-    package: 'egg-view-ejs',
+    package: 'egg-view-ejs'
   },
   mysql: {
     enable: true,
-    package: 'egg-mysql',
+    package: 'egg-mysql'
   },
   cors: {
     enable: true,
-    package: 'egg-cors',
-  },
-};
+    package: 'egg-cors'
+  }
+}
