@@ -12,7 +12,7 @@ module.exports = app => {
   router.post('/api/register', controller.home.register)
   router.post('/api/getList', controller.home.get_list)
   router.post('/api/updateList', controller.home.update_list)
-  router.post('/api/uploadFile', controller.home.upload_file)
+  router.post('/api/uploadFile', controller.mpAnalyzer.uploadFile)
   router.post('/api/submitQue', controller.home.submit_que)
   router.post('/api/getUserinfo', authMiddleware, controller.home.get_user_info)
   router.post('/api/loginOut', controller.home.log_out)

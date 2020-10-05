@@ -7,11 +7,14 @@
     "declarations": true
   },
   "dependencies": {
+    "compressing": "^1.5.1",
     "egg": "^2.27.0",
     "egg-cors": "^2.2.3",
     "egg-mysql": "^3.0.0",
     "egg-scripts": "^2.11.0",
     "egg-view-ejs": "^2.0.1",
+    "fs-extra": "^9.0.1",
+    "miniprogram-analyzer": "git+https://github.com/miniprogram-analyzer/miniprogram-analyzer.git",
     "webpack-dev-server": "^2.9.7"
   },
   "devDependencies": {

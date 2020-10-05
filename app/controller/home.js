@@ -299,6 +299,48 @@ class HomeController extends Controller {
     }
   }
 
+  async modify_user_info () {
+    const ctx = this.ctx
+    const { nameOrid, password, choice, replacement } = ctx.request.body
+    const VeriUser = await ctx.service.user.VeriUserByNaOrId(nameOrid, password)
+
+    if (!VeriUser) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '密码错误！'
+      }
+      return
+    }
+
+    const user = await ctx.service.user.getUserByNameOrId(nameOrid)
+    const id = user.id
+
+    let row = ''
+    if (choice === 'password') {
+      row = {
+        id,
+        password: replacement
+      }
+    } else if (choice === 'email') {
+      row = {
+        id,
+        email: replacement
+      }
+    } else {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '格式错误！'
+      }
+      return
+    }
+
+    const result = await this.app.mysql.update('student_test', row)// 更新 student_test 表中的记录
+
+    // 判断更新成功
+    const updateSuccess = result.affectedRows === 1
+    if (updateSuccess) { console.log('更新成功') }
+  }
+
   async get_user_interact () {
     const ctx = this.ctx
     const { id, choice } = ctx.request.body
