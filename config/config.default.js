@@ -82,12 +82,16 @@ module.exports = appInfo => {
 
   // 配置上传
   config.multipart = {
-    fileSize: '500kb',
     mode: 'file',
     cleanSchedule: {
       cron: '0 30 4 * * *'
     },
     whitelist: ['.png', '.jpg', '.jpeg', '.gif', '.zip', '.gz', '.bz2', '.tar.gz'] // 扩展几种上传的文件格式
+  }
+
+  // 评分模型相关
+  config.mpAnalyzer = {
+    dataDir: '/data/miniprogram-analyzer'
   }
 
   return {
