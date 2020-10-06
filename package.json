@@ -1,5 +1,5 @@
 {
-  "name": "code-analysis-platform",
+  "name": "miniprogram-analysis-platform",
   "version": "1.0.0",
   "description": "code analysis for miniprogram",
   "private": true,
@@ -36,8 +36,8 @@
     "node": ">=10.0.0"
   },
   "scripts": {
-    "start": "egg-scripts start --daemon --title=egg-server-example",
-    "stop": "egg-scripts stop --title=egg-server-example",
+    "start": "egg-scripts start --daemon --title=miniprogram-analysis-platform",
+    "stop": "egg-scripts stop --title=miniprogram-analysis-platform",
     "dev": "egg-bin dev",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
