@@ -57,11 +57,11 @@ module.exports = appInfo => {
       // 端口号
       port: '3306',
       // 用户名
-      user: 'oursparkspace',
+      user: 'user',
       // 密码
-      password: 'JR~Zz#-FM1tWoe)8>y1C',
+      password: 'password',
       // 数据库名
-      database: 'debugs'
+      database: 'database'
     },
     // 是否加载到 app 上，默认开启
     app: true,
