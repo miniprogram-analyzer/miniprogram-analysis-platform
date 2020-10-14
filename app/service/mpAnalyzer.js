@@ -6,7 +6,7 @@ const path = require('path')
 
 const Service = require('egg').Service
 
-const { inspect: miniprogramAnalyzer } = require('miniprogram-analyzer')
+const { inspect: miniprogramAnalyzer } = require('miniprogram-analyzer2')
 
 class mpAnalyzer extends Service {
   async saveFile (file, dest = path.join(this.app.config.mpAnalyzer.dataDir, 'miniprograms')) {
