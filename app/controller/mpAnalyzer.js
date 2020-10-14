@@ -1,7 +1,6 @@
 'strict'
 
 const Controller = require('egg').Controller
-const object = require('lodash/object')
 
 class mpAnalyzerController extends Controller {
   async uploadFile () {
@@ -14,12 +13,10 @@ class mpAnalyzerController extends Controller {
       const mpDir = await mpAnalyzer.unarchive(fileArchive)
       const report = await mpAnalyzer.analyze(mpDir)
 
-      const metrics = ['pages', 'hasCloudFunction', 'components', 'platoReport']
-
       ctx.body = {
         successFlag: 'Y',
         errorMsg: '上传成功！',
-        data: object.pick(report, metrics)
+        data: report
       }
     } catch (err) {
       console.log(err)
