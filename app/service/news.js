@@ -1,121 +1,120 @@
-'use strict'
+'use strict';
 
-const Service = require('egg').Service
+const Service = require('egg').Service;
 
 class NewsService extends Service {
-  async GetList1 (option, isentire, serial, size) {
-    let database = ''
+  async GetList1(option, isentire, serial, size) {
+    let database = '';
     if (option - 1) {
-      database = 'data_2020_test'
+      database = 'data_2020_test';
     } else {
-      database = 'data_2019'
+      database = 'data_2019';
     }
-    let list = await this.app.mysql.query('select * from ' + database, '')
+    let list = await this.app.mysql.query('select * from ' + database, '');
     if (!isentire) {
-      list = list.slice(serial - 1, serial + size - 1)
+      list = list.slice(serial - 1, serial + size - 1);
     }
-    return list
+    return list;
   }
 
-  async GetLengthOfData () {
-    const list = await this.app.mysql.query('select * from data_2020_test', '')
-    const mark = list.length
-    return mark + 1
+  async GetLengthOfData() {
+    const list = await this.app.mysql.query('select * from data_2020_test', '');
+    const mark = list.length;
+    return mark + 1;
   }
 
-  async VeriList (serial) {
-    const ser = await this.app.mysql.get('data_2019', { serial })
+  async VeriList(serial) {
+    const ser = await this.app.mysql.get('data_2019', { serial });
     if (!ser) {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
-  async GetCommentById (id) {
+  async GetCommentById(id) {
     const info = await this.app.mysql.select('comment',
       {
         where: {
-          guestid: id
+          guestid: id,
         }, // WHERE 条件
-        columns: ['partition', 'formerserial', 'hostid', 'content', 'time'] // 要查询的表字段
-      })
-    if (!info) return false
-    return info
+        columns: [ 'partition', 'formerserial', 'hostid', 'content', 'time' ], // 要查询的表字段
+      });
+    if (!info) return false;
+    return info;
   }
 
-  async GetReplyById (id) {
+  async GetReplyById(id) {
     const info = await this.app.mysql.select('reply',
       {
         where: {
-          guestid: id
+          guestid: id,
         }, // WHERE 条件
-        columns: ['partition', 'formerserial', 'hostid', 'content', 'time', 'floor'] // 要查询的表字段
-      })
-    if (!info) return false
-    return info
+        columns: [ 'partition', 'formerserial', 'hostid', 'content', 'time', 'floor' ], // 要查询的表字段
+      });
+    if (!info) return false;
+    return info;
   }
 
-  async GetLengthOfFeedback () {
-    const mark = await this.app.mysql.query('select * from feedback', '').length
-    return mark
+  async GetLengthOfFeedback() {
+    const list = await this.app.mysql.query('select * from feedback', '');
+    return list.length;
   }
 
-  async GetList2 (database) {
-    const ser = await this.app.mysql.query('select * from ' + database, '')
+  async GetList2(database) {
+    const ser = await this.app.mysql.query('select * from ' + database, '');
     if (!ser) {
-      return false
+      return false;
     }
-    return ser
+    return ser;
   }
 
-  async GetIdFormDiscuss (partition, formerserial) {
+  async GetIdFormDiscuss(partition, formerserial) {
     const info = await this.app.mysql.select('discuss_list',
       {
         where: {
           partition,
-          serial: formerserial
+          serial: formerserial,
         }, // WHERE 条件
-        columns: ['guestid'] // 要查询的表字段
-      })
-    if (!info) return false
-    return info
+        columns: [ 'guestid' ], // 要查询的表字段
+      });
+    if (!info) return false;
+    return info;
   }
 
-  async GetIdFormComment (partition, formerserial) {
+  async GetIdFormComment(partition, formerserial) {
     const info = await this.app.mysql.select('comment',
       {
         where: {
           partition,
-          serial: formerserial
+          serial: formerserial,
         }, // WHERE 条件
-        columns: ['guestid'] // 要查询的表字段
-      })
-    if (!info) return false
-    return info
+        columns: [ 'guestid' ], // 要查询的表字段
+      });
+    if (!info) return false;
+    return info;
   }
 
-  async GetSerialFormComment () {
-    const mark = await this.app.mysql.query('select * from comment', '').length
-    return mark
+  async GetSerialFormComment() {
+    const list = await this.app.mysql.query('select * from comment', '');
+    return list.length;
   }
 
-  async GetSerialFormReply () {
-    const mark = await this.app.mysql.query('select * from reply', '').length
-    return mark
+  async GetSerialFormReply() {
+    const list = await this.app.mysql.query('select * from reply', '');
+    return list.length;
   }
 
-  async GetFloorFormReply (partition, formerserial) {
+  async GetFloorFormReply(partition, formerserial) {
     const info = await this.app.mysql.select('reply',
       {
         where: {
           partition,
-          formerserial
-        } // WHERE 条件
-      })
-    if (!info) return false
-    console.log(info.length) // for test
-    return info.length
+          formerserial,
+        }, // WHERE 条件
+      });
+    if (!info) return false;
+      return info.length;
   }
 }
+module.exports = NewsService;
 
-module.exports = NewsService
