@@ -25,11 +25,11 @@ jobs:
           token_Private_Keys: ${{ secrets.TOKEN_PRIVATE_KEYS }}
         run: |
           mkdir -p ~/.ssh/
-          echo "$token_Private_Keys" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "$token_Private_Keys" > ~/.ssh/id_rsa_github_token
+          chmod 600 ~/.ssh/id_rsa_github_token
           ssh-keyscan 49.233.55.75 >> ~/.ssh/known_hosts
 
       # Runs a set of commands using the runners shell
       - name: Triger Update Script
         run: |
-          ssh ubuntu@49.233.55.75 "bash ~/CI/miniprogram-analysis-platform.sh"
+          ssh ubuntu@49.233.55.75 -i ~/.ssh/id_rsa_github_token "bash ~/CI/miniprogram-analysis-platform.sh"
