@@ -22,7 +22,7 @@ jobs:
 
       - name: Setup SSH Private Key
         env:
-          token_Private_Keys: ${{ secrets.token_Private_Keys }}
+          token_Private_Keys: ${{ secrets.TOKEN_PRIVATE_KEYS }}
         run: |
           mkdir -p ~/.ssh/
           echo "$token_Private_Keys" > ~/.ssh/id_rsa
