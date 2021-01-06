@@ -1,4 +1,5 @@
-'strict'
+/* eslint-disable camelcase */
+'use strict'
 
 const fs = require('fs')
 const path = require('path')
@@ -24,7 +25,6 @@ class HomeController extends Controller {
     }
 
     const userInfo = await ctx.service.user.getUserByNameOrId(nameOrid)
-    console.log(userInfo)
 
     // auth: boolean 判断用户登录状态
     ctx.session.auth = true
@@ -52,7 +52,7 @@ class HomeController extends Controller {
       if (!VeriRep) {
         ctx.body = {
           successFlag: 'Y',
-          errorMsg: '验证成功,请登录！'
+          errorMsg: '注册成功,请登录！'
         }
         const row = {
           id,
@@ -64,7 +64,7 @@ class HomeController extends Controller {
         // 判断更新成功
         const updateSuccess = result.affectedRows === 1
         if (updateSuccess) {
-          console.log('更新成功')
+          console.log('用户注册成功')
         }
 
         ctx.session.auth = true
@@ -89,9 +89,7 @@ class HomeController extends Controller {
     const { ctx } = this
     let { option, isentire, serial, size } = ctx.request.body
     if (option) {
-      console.log(typeof (option))
       if (typeof (option) === 'string') { [option, isentire, serial, size] = [Number(JSON.parse(option)), Number(JSON.parse(isentire)), JSON.parse(Number(serial)), Number(JSON.parse(size))] }
-      console.log(typeof (option))
       if (option !== 1 && option !== 2) {
         ctx.body = {
           successFlag: 'N',
@@ -103,7 +101,7 @@ class HomeController extends Controller {
     if (!isentire && isentire !== 0) isentire = 1
     if (!serial) serial = 1
     if (!size) size = 10
-    const list = await this.service.news.GetList(option, isentire, serial, size)
+    const list = await this.service.news.GetList1(option, isentire, serial, size)
     const msg = list
     ctx.body = { code: 1, msg }
   }
@@ -147,7 +145,7 @@ class HomeController extends Controller {
   async submit_que () {
     const ctx = this.ctx
     const { question, classify, detail, tag } = ctx.request.body
-    const mark = await ctx.service.news.GetMark()
+    const mark = await ctx.service.news.GetLengthOfData()
     if (!mark) {
       ctx.body = {
         successFlag: 'N',
@@ -221,7 +219,7 @@ class HomeController extends Controller {
           errorMsg: '上传成功！'
         }
       }
-      fs.writeFileSync(path.join('./', file.filename, 'binary'), file)
+      fs.writeFileSync(path.join('./picture', file.filename, 'binary'), file)
       const address = ''
       let serial = 0
       const list = await this.app.mysql.select('picture_address',
@@ -230,6 +228,8 @@ class HomeController extends Controller {
             id
           } // WHERE 条件
         })
+      console.log(typeof (list))
+      console.log(list)
       serial = 1 + list.length
       const row = {
         serial,
@@ -247,12 +247,10 @@ class HomeController extends Controller {
 
   async get_user_info () {
     const ctx = this.ctx
-    const { username } = ctx.request.body
-    // 测试用
-    // console.log(username);
-    const info = await ctx.service.user.GetUserByNa(username)
-
-    if (!info) {
+    const { id } = ctx.request.body
+    const info = await ctx.service.user.GetUserById(id)
+    console.log(!info)
+    if (info.length === 0) {
       ctx.body = {
         successFlag: 'N',
         errorMsg: '该学号不存在或该学号未注册！'
@@ -268,24 +266,38 @@ class HomeController extends Controller {
 
   async get_like_status () {
     const ctx = this.ctx
-    const { username, serial } = ctx.request.body
-    const info = await ctx.service.user.GetLikeByNa(username, serial)
-    if (info) ctx.body.msg = 1
-    else ctx.body.msg = 0
+    const { id, serial } = ctx.request.body
+    const info = await ctx.service.user.GetLikeById(id, serial)
+    if (info) ctx.body = 1
+    else ctx.body = 0
   }
 
   async get_like_num () {
     const ctx = this.ctx
     const { serial } = ctx.request.body
     const info = await ctx.service.user.GetLikeBySe(serial)
-    const like = await this.app.mysql.get('list', { serial })
-    if (info) ctx.body.msg = like.numof
+    const like = await this.app.mysql.select('share_list', {
+      where: { serial }, // WHERE 条件
+      columns: ['numof']
+    })
+    if (!info) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '获取失败！'
+      }
+    } else {
+      ctx.body = {
+        successFlag: 'Y',
+        errorMsg: '获取成功！',
+        msg: like
+      }
+    }
   }
 
   async like () {
     const ctx = this.ctx
-    const { username, serial } = ctx.request.body
-    const info = await ctx.service.user.LikeByNa(username, serial)
+    const { id, serial } = ctx.request.body
+    const info = await ctx.service.user.LikeById(id, serial)
     if (!info) {
       ctx.body = {
         successFlag: 'N',
@@ -296,6 +308,34 @@ class HomeController extends Controller {
         successFlag: 'Y',
         errorMsg: '操作成功！'
       }
+    }
+  }
+
+  async get_user_interact () {
+    const ctx = this.ctx
+    const { id, choice } = ctx.request.body
+    let list = ''
+    if (choice === 'comment') list = await this.service.news.GetCommentById(id)
+    else if (choice === 'reply') list = await this.service.news.GetReplyById(id)
+    else {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '输入格式有误,获取失败!'
+      }
+      return
+    }
+    if (!list) {
+      ctx.body = {
+        successFlag: 'N',
+        errorMsg: '获取失败!'
+      }
+      return
+    }
+    const msg = list
+    ctx.body = {
+      successFlag: 'Y',
+      errorMsg: '获取成功！',
+      msg
     }
   }
 
@@ -341,52 +381,27 @@ class HomeController extends Controller {
     if (updateSuccess) { console.log('更新成功') }
   }
 
-  async get_user_interact () {
-    const ctx = this.ctx
-    const { id, choice } = ctx.request.body
-    let list = ''
-    if (choice === 'comment') list = await this.service.user.GetCommentById(id)
-    else if (choice === 'reply') list = await this.service.user.GetReplyById(id)
-    else {
-      ctx.body = {
-        successFlag: 'N',
-        errorMsg: '输入格式有误,获取失败!'
-      }
-      return
-    }
-    if (!list) {
-      ctx.body = {
-        successFlag: 'N',
-        errorMsg: '获取失败!'
-      }
-      return
-    }
-    const msg = list
-    ctx.body = {
-      successFlag: 'Y',
-      errorMsg: '获取成功！',
-      msg
-    }
-  }
-
   async submit_comment () {
     const ctx = this.ctx
     const { partition, formerserial, content, guestid } = ctx.request.body
     const probe = await this.service.news.GetIdFormDiscuss(partition, formerserial)
-    if (!probe) {
+    if (probe.length === 0) {
       ctx.body = {
         successFlag: 'N',
         errorMsg: '非法格式,提交失败!'
       }
       return
     }
+    const lend = JSON.stringify(probe)
+    const hostid = JSON.parse(lend)[0].guestid
     const mark = await this.service.news.GetSerialFormComment()
     const row = {
       serial: mark + 1,
       partition,
       formerserial,
-      hostid: probe,
+      hostid,
       content,
+      time: new Date(),
       guestid
     }
 
@@ -406,22 +421,25 @@ class HomeController extends Controller {
     const ctx = this.ctx
     const { partition, formerserial, content, guestid } = ctx.request.body
     const probe = await this.service.news.GetIdFormComment(partition, formerserial)
-    if (!probe) {
+    if (probe.length === 0) {
       ctx.body = {
         successFlag: 'N',
         errorMsg: '非法格式,提交失败!'
       }
       return
     }
+    const lend = JSON.stringify(probe)
+    const hostid = JSON.parse(lend)[0].guestid
     const mark1 = await this.service.news.GetSerialFormReply()
     const mark2 = await this.service.news.GetFloorFormReply(partition, formerserial)
     const row = {
       serial: mark1 + 1,
       partition,
       formerserial,
-      floor: mark2,
-      hostid: probe,
+      floor: mark2 + 1,
+      hostid,
       content,
+      time: new Date(),
       guestid
     }
 
@@ -441,8 +459,8 @@ class HomeController extends Controller {
     const ctx = this.ctx
     const { choice, partition, formerserial } = ctx.request.body
     let list = ''
-    if (choice === 'comment') list = await this.service.news.GetComment(partition, formerserial)
-    else if (choice === 'reply') list = await this.service.news.GetReply(partition, formerserial)
+    if (choice === 'comment') list = await this.service.user.GetComment(partition, formerserial)
+    else if (choice === 'reply') list = await this.service.user.GetReply(partition, formerserial)
     else {
       ctx.body = {
         successFlag: 'N',
@@ -450,7 +468,7 @@ class HomeController extends Controller {
       }
       return
     }
-    if (!list) {
+    if (list.length === 0) {
       ctx.body = {
         successFlag: 'N',
         errorMsg: '获取失败!'
@@ -481,7 +499,6 @@ class HomeController extends Controller {
       about,
       content
     }
-
     const result = await this.app.mysql.insert('feedback', row) // 在 feedback 表中，插入记录
 
     // 判断插入成功

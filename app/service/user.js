@@ -1,13 +1,14 @@
+/* eslint-disable camelcase */
 'use strict'
 
 const Service = require('egg').Service
 
 class UserService extends Service {
-  async GetUserByNa (username) {
+  async GetUserById (id) {
     const user = await this.app.mysql.select('student_test',
       {
-        where: { username }, // WHERE 条件
-        columns: ['id', 'email', 'phone'] // 要查询的表字段
+        where: { id }, // WHERE 条件
+        columns: ['email', 'phone'] // 要查询的表字段
       })
     if (!user) {
       return false
@@ -56,7 +57,7 @@ class UserService extends Service {
 
   async VeriRepByNa (username) {
     const user = await this.app.mysql.query('select * from student_test', '')
-    var j = 0
+    let j = 0
     if (user) {
       for (let i = 0; i < user.length; i++) {
         if (user[i].username === username) { j++ }
@@ -69,14 +70,9 @@ class UserService extends Service {
     return true
   }
 
-  async GetLikeByNa (username, serial) {
-    const user = await this.app.mysql.get('student_test', { username })
-    if (!user || user.id) {
-      return false
-    }
-    const id = user.id
+  async GetLikeById (id, serial) {
     const info = await this.app.mysql.get('like_list', { id })
-    if (!info || user.likes) {
+    if (!info) {
       return false
     }
     const likes = info.likes
@@ -91,31 +87,30 @@ class UserService extends Service {
       if (Number(like_list[i].likes[serial - 1])) numof++
     }
     const row = {
-      serial,
       numof
     }
-    const result = await this.app.mysql.update('list', row)// 更新 list 表中的记录
+    const options = {
+      where: {
+        serial
+      }
+    }
+    const result = await this.app.mysql.update('share_list', row, options)// 更新 share_list 表中的记录
     const updateSuccess = result.affectedRows === 1
     if (updateSuccess) return true
     return false
   }
 
-  async LikeByNa (username, serial) {
-    const user = await this.app.mysql.get('student_test', { username })
-    if (!user || user.id) {
-      return false
-    }
-    const id = user.id
+  async LikeById (id, serial) {
     const info = await this.app.mysql.get('like_list', { id })
-    if (!info || user.likes) {
+    if (!info) {
       return false
     }
     const likes = info.likes
     const tt = likes[serial - 1]
-    likes[serial - 1] = Math.abs(tt - 1)
+    const lend = (likes.substring(0, serial - 1)) + Math.abs(tt - 1) + (likes.substring(serial))
     const row = {
       id,
-      likes
+      likes: lend
     }
     const result = await this.app.mysql.update('like_list', row)// 更新 like_list 表中的记录
     const updateSuccess = result.affectedRows === 1

@@ -56,8 +56,8 @@ class NewsService extends Service {
   }
 
   async GetLengthOfFeedback () {
-    const mark = await this.app.mysql.query('select * from feedback', '').length
-    return mark
+    const list = await this.app.mysql.query('select * from feedback', '')
+    return list.length
   }
 
   async GetList2 (database) {
@@ -95,13 +95,13 @@ class NewsService extends Service {
   }
 
   async GetSerialFormComment () {
-    const mark = await this.app.mysql.query('select * from comment', '').length
-    return mark
+    const list = await this.app.mysql.query('select * from comment', '')
+    return list.length
   }
 
   async GetSerialFormReply () {
-    const mark = await this.app.mysql.query('select * from reply', '').length
-    return mark
+    const list = await this.app.mysql.query('select * from reply', '')
+    return list.length
   }
 
   async GetFloorFormReply (partition, formerserial) {
@@ -113,9 +113,7 @@ class NewsService extends Service {
         } // WHERE 条件
       })
     if (!info) return false
-    console.log(info.length) // for test
     return info.length
   }
 }
-
 module.exports = NewsService

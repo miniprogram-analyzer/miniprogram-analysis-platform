@@ -61,7 +61,7 @@ module.exports = appInfo => {
       // 密码
       password: 'password',
       // 数据库名
-      database: 'database'
+      database: 'debugs'
     },
     // 是否加载到 app 上，默认开启
     app: true,
@@ -82,16 +82,12 @@ module.exports = appInfo => {
 
   // 配置上传
   config.multipart = {
+    fileSize: '500kb',
     mode: 'file',
     cleanSchedule: {
       cron: '0 30 4 * * *'
     },
     whitelist: ['.png', '.jpg', '.jpeg', '.gif', '.zip', '.gz', '.bz2', '.tar.gz'] // 扩展几种上传的文件格式
-  }
-
-  // 评分模型相关
-  config.mpAnalyzer = {
-    dataDir: '/data/miniprogram-analyzer'
   }
 
   return {
