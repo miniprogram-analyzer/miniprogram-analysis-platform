@@ -20,7 +20,7 @@ class UserService extends Service {
     const userById = await this.app.mysql.get('student_test', { id: nameOrId })
     const userByName = await this.app.mysql.get('student_test', { username: nameOrId })
     const user = userById || userByName || {}
-    const { id, username } = user
+    const { id, username, identity } = user
     return {
       id,
       username,
