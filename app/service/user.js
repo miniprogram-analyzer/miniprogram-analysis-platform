@@ -23,7 +23,8 @@ class UserService extends Service {
     const { id, username } = user
     return {
       id,
-      username
+      username,
+      identity
     }
   }
 
