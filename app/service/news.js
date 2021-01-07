@@ -37,7 +37,7 @@ class NewsService extends Service {
         where: {
           guestid: id
         }, // WHERE 条件
-        columns: ['partition', 'formerserial', 'hostid', 'content', 'time'] // 要查询的表字段
+        columns: ['partition', 'formerserial', 'hostid', 'content', 'time', 'identity'] // 要查询的表字段
       })
     if (!info) return false
     return info

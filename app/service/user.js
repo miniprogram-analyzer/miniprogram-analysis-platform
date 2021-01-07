@@ -125,7 +125,7 @@ class UserService extends Service {
           partition,
           formerserial
         }, // WHERE 条件
-        columns: ['serial', 'content', 'time', 'guestid'] // 要查询的表字段
+        columns: ['serial', 'content', 'time', 'guestid', 'identity'] // 要查询的表字段
       })
     if (!message) {
       return false

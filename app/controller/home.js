@@ -471,8 +471,9 @@ class HomeController extends Controller {
     }
     if (list.length === 0) {
       ctx.body = {
-        successFlag: 'N',
-        errorMsg: '获取失败!'
+        successFlag: 'Y',
+        errorMsg: '获取成功！',
+        msg: null
       }
       return
     }
