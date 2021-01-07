@@ -383,7 +383,7 @@ class HomeController extends Controller {
 
   async submit_comment () {
     const ctx = this.ctx
-    const { partition, formerserial, content, guestid } = ctx.request.body
+    const { partition, formerserial, content, guestid, identity } = ctx.request.body
     const probe = await this.service.news.GetIdFormDiscuss(partition, formerserial)
     if (probe.length === 0) {
       ctx.body = {
@@ -402,7 +402,8 @@ class HomeController extends Controller {
       hostid,
       content,
       time: new Date(),
-      guestid
+      guestid,
+      identity
     }
 
     const result = await this.app.mysql.insert('comment', row) // 在 comment 表中，插入记录
