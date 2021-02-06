@@ -46,7 +46,10 @@ class mpAnalyzer extends Service {
     const reportDir = path.join(this.app.config.mpAnalyzer.dataDir, 'reports', path.basename(mpDir))
     const report = await miniprogramAnalyzer(mpRootDir, reportDir)
     report.platoReport = path.join(reportDir, 'plato')
-    return report
+    return {
+      report,
+      reportDir
+    }
   }
 }
 

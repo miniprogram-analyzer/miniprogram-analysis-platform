@@ -3,15 +3,25 @@
 const Controller = require('egg').Controller
 
 class mpAnalyzerController extends Controller {
-  async uploadFile () {
-    const { ctx } = this
+  // 分析提交小程序包，生成报告
+  async analyze () {
+    const { ctx, app } = this
+    const { mysql } = app
     const { mpAnalyzer } = ctx.service
+
+    const { id } = ctx.session.userInfo
 
     const file = ctx.request.files[0]
     try {
       const fileArchive = await mpAnalyzer.saveFile(file)
       const mpDir = await mpAnalyzer.unarchive(fileArchive)
-      const report = await mpAnalyzer.analyze(mpDir)
+      const { report, reportDir } = await mpAnalyzer.analyze(mpDir)
+
+      await mysql.insert('code_analysis', {
+        user_id: id,
+        miniprogram_path: fileArchive,
+        report_path: reportDir
+      })
 
       ctx.body = {
         successFlag: 'Y',
@@ -25,6 +35,24 @@ class mpAnalyzerController extends Controller {
         errorMsg: '上传失败！',
         error: err
       }
+    }
+  }
+
+  // 返回用户小程序分析历史
+  async history () {
+    const { ctx, app } = this
+    const { mysql } = app
+
+    const { id } = ctx.session.userInfo
+
+    const analysisList = await mysql.select('code_analysis', {
+      where: {
+        user_id: id
+      }
+    })
+
+    ctx.body = {
+      data: analysisList
     }
   }
 }
