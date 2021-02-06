@@ -6,7 +6,7 @@
 
 ## QuickStart
 
-see [egg docs][egg] for more detail.
+[API 文档](https://l81w.w.eolinker.com/#/home/api_studio/inside/api/list?groupID=-1&projectHashKey=PSpFDiH2f3c1f80117d47fc916e8ce8d799404697481ae5&spaceKey=l81w)
 
 ### Development
 
@@ -22,12 +22,5 @@ $ open http://localhost:7001/
 $ npm run start
 $ npm run stop
 ```
-
-### npm scripts
-
-- Use `npm run lint` to check code style.
-- Use `npm test` to run unit test.
-- Use `npm run autod` to auto detect dependencies upgrade, see [autod](https://www.npmjs.com/package/autod) for more detail.
-
 
 [egg]: https://eggjs.org
