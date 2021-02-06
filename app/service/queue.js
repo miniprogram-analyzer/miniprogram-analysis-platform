@@ -1,8 +1,11 @@
 const Bull = require('bull')
 const chokidar = require('chokidar')
 const Service = require('egg').Service
+const redisConfig = require('../../config/queue')
 
-const OJQueue = new Bull('online-judge-queue')
+// TODO: 可能存在问题，队列在每次网络请求时重新实例化
+// https://eggjs.org/zh-cn/basics/service.html#%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9
+const OJQueue = new Bull('online-judge-queue', { redis: redisConfig.redis })
 
 OJQueue.process(async job => {
   await checkResult(job.data.fileName)
