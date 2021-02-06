@@ -8,7 +8,7 @@ class UserService extends Service {
     const user = await this.app.mysql.select('student_test',
       {
         where: { id }, // WHERE 条件
-        columns: ['email', 'phone'] // 要查询的表字段
+        columns: ['email', 'phone', 'face'] // 要查询的表字段
       })
     if (!user) {
       return false
@@ -71,21 +71,50 @@ class UserService extends Service {
     return true
   }
 
-  async GetLikeById (id, serial) {
-    const info = await this.app.mysql.get('like_list', { id })
-    if (!info) {
+  async GetLikeById (choice, id, serial) {
+    const list = await this.app.mysql.get('like_list', { id })
+    if (!list) {
       return false
     }
-    const likes = info.likes
+    const info = JSON.parse(JSON.stringify(list))
+
+    let likes
+    if (choice === 'share') {
+      likes = info.likes_share
+    } else if (choice === 'discuss') {
+      likes = info.likes_discuss
+    } else {
+      likes = info.likes_comment
+    }
+
     if (Number(likes[serial - 1])) return true
     return false
   }
 
-  async GetLikeBySe (serial) {
-    const like_list = await this.app.mysql.query('select * from like_list', '')
+  async GetLikeBySe (column, serial) {
+    var table = ''
+    if (column === 'share') {
+      const like_list = await this.app.mysql.select('like_list', {
+        columns: ['likes_share']
+      })
+      var info = JSON.parse(JSON.stringify(like_list))
+      table = 'share_list'
+    } else if (column === 'discuss') {
+      const like_list = await this.app.mysql.select('like_list', {
+        columns: ['likes_discuss']
+      })
+      info = JSON.parse(JSON.stringify(like_list))
+      table = 'discuss_list'
+    } else {
+      const like_list = await this.app.mysql.select('like_list', {
+        columns: ['likes_conment']
+      })
+      info = JSON.parse(JSON.stringify(like_list))
+      table = 'comment'
+    }
     let numof = 0
-    for (let i = 0; i < like_list.length; i++) {
-      if (Number(like_list[i].likes[serial - 1])) numof++
+    for (var item in info) {
+      if (Number(Object.values(info[item])[0][serial - 1])) numof++
     }
     const row = {
       numof
@@ -95,23 +124,50 @@ class UserService extends Service {
         serial
       }
     }
-    const result = await this.app.mysql.update('share_list', row, options)// 更新 share_list 表中的记录
+    const result = await this.app.mysql.update(table, row, options)// 更新 table 中的记录
+    const like = await this.app.mysql.select(table, {
+      where: { serial }, // WHERE 条件
+      columns: ['numof']
+    })
     const updateSuccess = result.affectedRows === 1
-    if (updateSuccess) return true
+    if (updateSuccess) return like
     return false
   }
 
-  async LikeById (id, serial) {
-    const info = await this.app.mysql.get('like_list', { id })
-    if (!info) {
+  async LikeById (id, serial, column) {
+    const list = await this.app.mysql.get('like_list', { id })
+    // const info = await this.app.mysql.select('like_list', { // 搜索 like_list 表
+    //   where: { id }, // WHERE 条件
+    //   columns: [column] // 要查询的表字段
+    // });
+    if (!list) {
       return false
     }
-    const likes = info.likes
-    const tt = likes[serial - 1]
-    const lend = (likes.substring(0, serial - 1)) + Math.abs(tt - 1) + (likes.substring(serial))
-    const row = {
-      id,
-      likes: lend
+    const info = JSON.parse(JSON.stringify(list))
+    if (column === 'share') {
+      const likes = info.likes_share
+      const tt = likes[serial - 1]
+      const lend = (likes.substring(0, serial - 1)) + Math.abs(tt - 1) + (likes.substring(serial))
+      var row = {
+        id,
+        likes_share: lend
+      }
+    } else if (column === 'discuss') {
+      const likes = info.likes_discuss
+      const tt = likes[serial - 1]
+      const lend = (likes.substring(0, serial - 1)) + Math.abs(tt - 1) + (likes.substring(serial))
+      row = {
+        id,
+        likes_discuss: lend
+      }
+    } else {
+      const likes = info.likes_comment
+      const tt = likes[serial - 1]
+      const lend = (likes.substring(0, serial - 1)) + Math.abs(tt - 1) + (likes.substring(serial))
+      row = {
+        id,
+        likes_comment: lend
+      }
     }
     const result = await this.app.mysql.update('like_list', row)// 更新 like_list 表中的记录
     const updateSuccess = result.affectedRows === 1

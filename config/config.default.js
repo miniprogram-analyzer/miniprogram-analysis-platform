@@ -40,7 +40,7 @@ module.exports = appInfo => {
       enable: false,
       ignoreJSON: true
     },
-    domainWhiteList: ['http://localhost:8081', 'http://localhost:9527', 'http://122.51.210.8', 'http://code.f00bar.top', 'http://bupt-c607.cn']
+    domainWhiteList: ['http://localhost:8081', 'http://localhost:9527', 'http://122.51.210.8', 'http://localhost:8008', 'http://49.233.55.75', 'http://code.f00bar.top', 'http://bupt-c607.cn']
   }
 
   config.cors = {
@@ -88,6 +88,10 @@ module.exports = appInfo => {
       cron: '0 30 4 * * *'
     },
     whitelist: ['.png', '.jpg', '.jpeg', '.gif', '.zip', '.gz', '.bz2', '.tar.gz'] // 扩展几种上传的文件格式
+  }
+
+  config.mpAnalyzer = {
+    dataDir: '/data/miniprogram-analyzer'
   }
 
   return {

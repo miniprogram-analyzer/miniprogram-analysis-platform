@@ -6,7 +6,7 @@ module.exports = (options, app) => {
     const forbidips = options.forbidips
 
     // 获取客户端ip
-    // console.log(forbidips);
+    // console.log(forbidips)
 
     const clientip = ctx.request.ip
 

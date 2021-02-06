@@ -39,11 +39,13 @@
     "start": "egg-scripts start --daemon --title=miniprogram-analysis-platform",
     "stop": "egg-scripts stop --title=miniprogram-analysis-platform",
     "dev": "egg-bin dev",
+    "stage": "egg-scripts start --daemon --env=stage --title=miniprogram-analysis-platform",
     "debug": "egg-bin debug",
     "test": "npm run lint -- --fix && npm run test-local",
     "test-local": "egg-bin test",
     "cov": "egg-bin cov",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "ci": "npm run lint && npm run cov",
     "autod": "autod"
   },

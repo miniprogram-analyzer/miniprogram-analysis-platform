@@ -22,7 +22,8 @@ class mpAnalyzerController extends Controller {
       console.log(err)
       ctx.body = {
         successFlag: 'N',
-        errorMsg: '上传失败！'
+        errorMsg: '上传失败！',
+        error: err
       }
     }
   }

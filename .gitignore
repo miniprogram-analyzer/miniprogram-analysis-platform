@@ -107,3 +107,4 @@ dist
 run
 config/config.local.js
 config/config.prod.js
+config/config.stage.js
