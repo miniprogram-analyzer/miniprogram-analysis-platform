@@ -1,7 +1,5 @@
-/* eslint-disable camelcase */
 'use strict'
 
-const fs = require('fs')
 const Controller = require('egg').Controller
 
 class HomeController extends Controller {
@@ -76,13 +74,13 @@ class HomeController extends Controller {
     }
   }
 
-  async log_out () {
+  async logOut () {
     const { ctx } = this
     ctx.session = null
     ctx.status = 204
   }
 
-  async get_list () {
+  async getList () {
     const { ctx } = this
     let { option, isentire, serial, size } = ctx.request.body
     if (option) {
@@ -103,7 +101,7 @@ class HomeController extends Controller {
     ctx.body = { code: 1, msg }
   }
 
-  async update_list () {
+  async updateList () {
     const ctx = this.ctx
     const { serial, question, classify, detail, tag } = ctx.request.body
     const VeriList = await ctx.service.news.VeriList(serial)
@@ -139,7 +137,7 @@ class HomeController extends Controller {
     }
   }
 
-  async submit_que () {
+  async submitQue () {
     const ctx = this.ctx
     const { question, classify, detail, tag } = ctx.request.body
     const mark = await ctx.service.news.GetLengthOfData()
@@ -169,227 +167,7 @@ class HomeController extends Controller {
     }
   }
 
-  async upload_picture_to_discuss () {
-    const { ctx } = this
-    console.log(ctx.request.body)
-    console.log('got %d files', ctx.request.files.length)
-    for (const file of ctx.request.files) {
-      console.log('field: ' + file.fieldname)
-      console.log('filename: ' + file.filename)
-      console.log('encoding: ' + file.encoding)
-      console.log('mime: ' + file.mime)
-      console.log('tmp filepath: ' + file.filepath)
-
-      const fileName = file.filename
-      var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
-      // console.log(fileExtension)
-
-      const name = await ctx.service.news.GenerateUuidJustRandom()
-      var newpath = '../../picture/discuss' + '/' + name + '.' + fileExtension
-      fs.copyFileSync(file.filepath, newpath)
-      //    fs.copyFile(file.filepath, newpath, (err)=>{
-      //    if (err) {
-      //      //console.log(err)
-      //      ctx.body = {
-      //        successFlag: 'N',
-      //        errorMsg: '操作失败！'
-      //      }
-      //    } else {
-      //        //console.log('已经复制并移动')
-      //        ctx.body = {
-      //          successFlag: 'Y',
-      //          errorMsg: '操作成功！',
-      //          msg: newpath
-      //        }
-      //      }
-      //    })
-      ctx.body = {
-        success: true,
-        errorMsg: '操作成功！',
-        msg: newpath
-      }
-    }
-  }
-
-  async upload_picture_to_share () {
-    const { ctx } = this
-    console.log(ctx.request.body)
-    console.log('got %d files', ctx.request.files.length)
-    for (const file of ctx.request.files) {
-      console.log('field: ' + file.fieldname)
-      console.log('filename: ' + file.filename)
-      console.log('encoding: ' + file.encoding)
-      console.log('mime: ' + file.mime)
-      console.log('tmp filepath: ' + file.filepath)
-
-      const fileName = file.filename
-      var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
-
-      const name = await ctx.service.news.GenerateUuidJustRandom()
-      var newpath = '../../picture/share' + '/' + name + '.' + fileExtension
-      fs.copyFileSync(file.filepath, newpath)
-      ctx.body = {
-        success: true,
-        errorMsg: '操作成功！',
-        msg: newpath
-      }
-    }
-  }
-
-  async upload_picture_to_person () {
-    const { ctx } = this
-    const { id } = ctx.request.body
-    console.log(ctx.request.body)
-    console.log('got %d files', ctx.request.files.length)
-    for (const file of ctx.request.files) {
-      console.log('field: ' + file.fieldname)
-      console.log('filename: ' + file.filename)
-      console.log('encoding: ' + file.encoding)
-      console.log('mime: ' + file.mime)
-      console.log('tmp filepath: ' + file.filepath)
-
-      const fileName = file.filename
-      var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
-
-      const name = await ctx.service.news.GenerateUuidJustRandom()
-      var newpath = '../../picture/person' + '/' + name + '.' + fileExtension
-      fs.copyFileSync(file.filepath, newpath)
-
-      const row = {
-        id,
-        face: newpath
-      }
-      const result = await this.app.mysql.update('student_test', row)// 更新 student_test 表中的记录
-
-      // 判断更新成功
-      const updateSuccess = result.affectedRows === 1
-      if (updateSuccess) {
-        ctx.body = {
-          successFlag: 'Y',
-          errorMsg: '上传成功!'
-        }
-      } else {
-        ctx.body = {
-          successFlag: 'N',
-          errorMsg: '上传失败!'
-        }
-      }
-    }
-  }
-
-  async upload_picture_to_feedback () {
-    const { ctx } = this
-    console.log(ctx.request.body)
-    console.log('got %d files', ctx.request.files.length)
-    var pic_add = []
-    var i = 0
-    for (const file of ctx.request.files) {
-      console.log('field: ' + file.fieldname)
-      console.log('filename: ' + file.filename)
-      console.log('encoding: ' + file.encoding)
-      console.log('mime: ' + file.mime)
-      console.log('tmp filepath: ' + file.filepath)
-
-      const fileName = file.filename
-      var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
-
-      const name = await ctx.service.news.GenerateUuidJustRandom()
-      var newpath = '../../picture/feedback' + '/' + name + '.' + fileExtension
-      fs.copyFileSync(file.filepath, newpath)
-      pic_add[i] = newpath
-      i += 1
-    }
-    const mark = await ctx.service.news.GetLengthOfFeedback()
-
-    const row = {
-      picture: pic_add
-    }
-    const options = {
-      where: {
-        serial: mark
-      }
-    }
-    const result = await this.app.mysql.update('feedback', row, options)// 更新 feedback 表中的记录
-
-    // 判断更新成功
-    const updateSuccess = result.affectedRows === 1
-    if (updateSuccess) {
-      ctx.body = {
-        successFlag: 'Y',
-        errorMsg: '上传成功!'
-      }
-    } else {
-      ctx.body = {
-        successFlag: 'N',
-        errorMsg: '上传失败!'
-      }
-    }
-  }
-
-  async upload_file_for_test () {
-    const { ctx } = this
-    const { id } = ctx.request.body
-    console.log(ctx.request.body)
-    const file = await ctx.request.files[0]
-    console.log('field: ' + file.fieldname)
-    console.log('filename: ' + file.filename)
-    console.log('encoding: ' + file.encoding)
-    console.log('mime: ' + file.mime)
-    console.log('tmp filepath: ' + file.filepath)
-
-    const fileName = file.filename
-    var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
-
-    const name = await ctx.service.news.GenerateUuidAddId(id)
-    var newpath = '../../file/test' + '/' + name + '.' + fileExtension
-    fs.copyFileSync(file.filepath, newpath)
-    ctx.body = {
-      success: true,
-      errorMsg: '操作成功！',
-      msg: newpath
-    }
-  }
-
-  async upload_file_for_exam () {
-    const { ctx } = this
-    const { id } = ctx.request.body
-    console.log(ctx.request.body)
-    const file = await ctx.request.files[0]
-    console.log('field: ' + file.fieldname)
-    console.log('filename: ' + file.filename)
-    console.log('encoding: ' + file.encoding)
-    console.log('mime: ' + file.mime)
-    console.log('tmp filepath: ' + file.filepath)
-
-    const fileName = file.filename
-    var fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
-
-    const name = await ctx.service.news.GenerateUuidAddId(id)
-    var newpath = '../../file/exam' + '/' + name + '.' + fileExtension
-    fs.copyFileSync(file.filepath, newpath)
-
-    const row = {
-      id,
-      exam: newpath
-    }
-    const result = await this.app.mysql.update('student_test', row)// 更新 student_test 表中的记录
-
-    // 判断更新成功
-    const updateSuccess = result.affectedRows === 1
-    if (updateSuccess) {
-      ctx.body = {
-        successFlag: 'Y',
-        errorMsg: '上传成功!'
-      }
-    } else {
-      ctx.body = {
-        successFlag: 'N',
-        errorMsg: '上传失败!'
-      }
-    }
-  }
-
-  async get_user_info () {
+  async getUserInfo () {
     const ctx = this.ctx
     const { id } = ctx.request.body
     const info = await ctx.service.user.GetUserById(id)
@@ -408,7 +186,7 @@ class HomeController extends Controller {
     }
   }
 
-  async get_like_status () {
+  async getLikeStatus () {
     const ctx = this.ctx
     const { choice, id, serial } = ctx.request.body
     if (choice !== 'share' && choice !== 'discuss' && choice !== 'comment') {
@@ -423,7 +201,7 @@ class HomeController extends Controller {
     else ctx.body = 0
   }
 
-  async get_like_num () {
+  async getLikeNum () {
     const ctx = this.ctx
     const { choice, serial } = ctx.request.body
     if (choice !== 'share' && choice !== 'discuss' && choice !== 'comment') {
@@ -473,7 +251,7 @@ class HomeController extends Controller {
     }
   }
 
-  async get_user_interact () {
+  async getUserInteract () {
     const ctx = this.ctx
     const { id, choice } = ctx.request.body
     let list = ''
@@ -501,7 +279,7 @@ class HomeController extends Controller {
     }
   }
 
-  async modify_user_info () {
+  async modifyUserInfo () {
     const ctx = this.ctx
     const { nameOrid, password, choice, replacement } = ctx.request.body
     const VeriUser = await ctx.service.user.VeriUserByNaOrId(nameOrid, password)
@@ -543,7 +321,7 @@ class HomeController extends Controller {
     if (updateSuccess) { console.log('更新成功') }
   }
 
-  async submit_comment () {
+  async submitComment () {
     const ctx = this.ctx
     const { partition, formerserial, content, guestid, identity } = ctx.request.body
     const probe = await this.service.news.GetIdFromDiscuss(partition, formerserial)
@@ -580,7 +358,7 @@ class HomeController extends Controller {
     }
   }
 
-  async submit_reply () {
+  async submitReply () {
     const ctx = this.ctx
     const { partition, formerserial, content, guestid } = ctx.request.body
     const probe = await this.service.news.GetIdFromComment(partition, formerserial)
@@ -618,7 +396,7 @@ class HomeController extends Controller {
     }
   }
 
-  async get_reply_or_comment () {
+  async getReplyOrComment () {
     const ctx = this.ctx
     const { choice, partition, formerserial } = ctx.request.body
     let list = ''
@@ -647,7 +425,7 @@ class HomeController extends Controller {
     }
   }
 
-  async submit_feedback () {
+  async submitFeedback () {
     const ctx = this.ctx
     const { id, about, content } = ctx.request.body
     const mark = await ctx.service.news.GetLengthOfFeedback()
@@ -676,7 +454,7 @@ class HomeController extends Controller {
     }
   }
 
-  async get_list_num () {
+  async getListNum () {
     const { ctx } = this
     const { choice } = ctx.request.body
     let table = ''
@@ -706,10 +484,10 @@ class HomeController extends Controller {
     }
   }
 
-  async print_list () {
+  async printList () {
     const { ctx } = this
     let { choice, isentire, serial, size, partition } = ctx.request.body
-    const part_set = ['git入门', '组件', '我爱运动', '我爱美食', '我爱学习', '布局设计']
+    const partSet = ['git入门', '组件', '我爱运动', '我爱美食', '我爱学习', '布局设计']
     let table = ''
 
     if (choice === 'discuss') table = 'discuss_list'
@@ -722,7 +500,7 @@ class HomeController extends Controller {
       return
     }
 
-    if (partition && !part_set.includes(partition)) {
+    if (partition && !partSet.includes(partition)) {
       ctx.body = {
         successFlag: 'N',
         errorMsg: '不存在的分区,请求失败!'
@@ -751,7 +529,7 @@ class HomeController extends Controller {
     }
   }
 
-  async submit_share () {
+  async submitShare () {
     const ctx = this.ctx
     const { guestid, content, title } = ctx.request.body
     const mark = await this.service.news.GetSerialFromShare()
@@ -781,7 +559,7 @@ class HomeController extends Controller {
     }
   }
 
-  async submit_discuss () {
+  async submitDiscuss () {
     const ctx = this.ctx
     const { guestid, partition, content, title, identity } = ctx.request.body
     const mark = await this.service.news.GetSerialFromDiscuss()
@@ -813,7 +591,7 @@ class HomeController extends Controller {
     }
   }
 
-  async save_problem () {
+  async saveProblem () {
     const ctx = this.ctx
     const { detail } = ctx.request.body
     const mark = await this.service.news.GetSerialFromProblem()
@@ -840,7 +618,7 @@ class HomeController extends Controller {
     }
   }
 
-  async print_problem () {
+  async printProblem () {
     const { ctx } = this
     let { isentire, serial, size } = ctx.request.body
     const a = Number(isentire)
@@ -856,7 +634,7 @@ class HomeController extends Controller {
     }
   }
 
-  async get_problem () {
+  async getProblem () {
     const ctx = this.ctx
     const { id } = ctx.request.body
 
@@ -881,7 +659,7 @@ class HomeController extends Controller {
     }
   }
 
-  async print_feedback () {
+  async printFeedback () {
     const { ctx } = this
     const list = await this.app.mysql.select('feedback')
     if (!list) {
