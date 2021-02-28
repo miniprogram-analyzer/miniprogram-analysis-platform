@@ -64,7 +64,7 @@ class HomeController extends Controller {
         // 判断更新成功
         const updateSuccess = result.affectedRows === 1
         if (updateSuccess) {
-          console.log('用户注册成功')
+          ctx.logger.info('用户注册成功')
         }
 
         ctx.session.auth = true
@@ -136,7 +136,7 @@ class HomeController extends Controller {
 
       // 判断更新成功
       const updateSuccess = result.affectedRows === 1
-      if (updateSuccess) { console.log('更新成功') }
+      if (updateSuccess) { ctx.logger.info('更新成功') }
     }
   }
 
@@ -166,7 +166,7 @@ class HomeController extends Controller {
 
       // 判断插入成功
       const insertSuccess = result.affectedRows === 1
-      if (insertSuccess) { console.log('更新成功') }
+      if (insertSuccess) { ctx.logger.info('更新成功') }
     }
   }
 
@@ -174,7 +174,7 @@ class HomeController extends Controller {
     const ctx = this.ctx
     const { id } = ctx.request.body
     const info = await ctx.service.user.GetUserById(id)
-    console.log(!info)
+    ctx.logger.info(!info)
     if (info.length === 0) {
       ctx.body = {
         successFlag: 'N',
@@ -233,7 +233,7 @@ class HomeController extends Controller {
     const ctx = this.ctx
     const { choice, id, serial } = ctx.request.body
     const info = await ctx.service.user.LikeById(id, serial, choice)
-    console.log(choice)
+    ctx.logger.info(choice)
     if (choice !== 'share' && choice !== 'discuss' && choice !== 'comment') {
       ctx.body = {
         successFlag: 'N',
@@ -321,7 +321,7 @@ class HomeController extends Controller {
 
     // 判断更新成功
     const updateSuccess = result.affectedRows === 1
-    if (updateSuccess) { console.log('更新成功') }
+    if (updateSuccess) { ctx.logger.info('更新成功') }
   }
 
   async submitComment () {
@@ -452,7 +452,7 @@ class HomeController extends Controller {
       ctx.body = {
         successFlag: 'Y',
         errorMsg: '记录添加成功！'
-        // console.log('更新成功')
+        // ctx.logger.info('更新成功')
       }
     }
   }
@@ -646,7 +646,7 @@ class HomeController extends Controller {
       columns: ['detail'] // 要查询的表字段
     })
     const res = JSON.parse(JSON.stringify(results))
-    // console.log(res)
+    // ctx.logger.info(res)
     // 判断读取成功
     if (results) {
       ctx.body = {

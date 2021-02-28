@@ -95,6 +95,10 @@ module.exports = appInfo => {
     dataDir: '/data/miniprogram-analyzer' // 小程序包及报告存储路径
   }
 
+  config.logger = {
+    disableConsoleAfterReady: false
+  }
+
   return {
     ...config,
     ...userConfig

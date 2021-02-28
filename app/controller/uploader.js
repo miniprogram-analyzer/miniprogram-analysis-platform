@@ -6,11 +6,11 @@ class UploaderController extends Controller {
     const { ctx } = this
 
     for (const file of ctx.request.files) {
-      console.log('field: ' + file.fieldname)
-      console.log('filename: ' + file.filename)
-      console.log('encoding: ' + file.encoding)
-      console.log('mime: ' + file.mime)
-      console.log('tmp filepath: ' + file.filepath)
+      ctx.logger.info('field: ' + file.fieldname)
+      ctx.logger.info('filename: ' + file.filename)
+      ctx.logger.info('encoding: ' + file.encoding)
+      ctx.logger.info('mime: ' + file.mime)
+      ctx.logger.info('tmp filepath: ' + file.filepath)
 
       const fileName = file.filename
       const fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1)
@@ -120,7 +120,7 @@ class UploaderController extends Controller {
 
   async uploadFile2Test () {
     const { ctx } = this
-    const { id } = ctx.request.body
+    const { id, qid } = ctx.request.body
 
     const file = await ctx.request.files[0]
 
@@ -130,6 +130,9 @@ class UploaderController extends Controller {
     const name = await ctx.service.news.GenerateUuidAddId(id)
     const newpath = '../../file/test' + '/' + name + '.' + fileExtension
     fs.copyFileSync(file.filepath, newpath)
+
+    ctx.service.queue.add({ filename: name, question: `question${qid}` })
+
     ctx.body = {
       success: true,
       errorMsg: '操作成功！',
