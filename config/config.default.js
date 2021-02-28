@@ -94,6 +94,10 @@ module.exports = appInfo => {
     dataDir: '/data/miniprogram-analyzer'
   }
 
+  config.logger = {
+    disableConsoleAfterReady: false
+  }
+
   return {
     ...config,
     ...userConfig
