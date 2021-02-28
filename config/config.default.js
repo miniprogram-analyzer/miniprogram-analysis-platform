@@ -90,8 +90,9 @@ module.exports = appInfo => {
     whitelist: ['.png', '.jpg', '.jpeg', '.gif', '.zip', '.gz', '.bz2', '.tar.gz'] // 扩展几种上传的文件格式
   }
 
+  // 代码分析模型相关
   config.mpAnalyzer = {
-    dataDir: '/data/miniprogram-analyzer'
+    dataDir: '/data/miniprogram-analyzer' // 小程序包及报告存储路径
   }
 
   config.logger = {

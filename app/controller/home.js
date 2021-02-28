@@ -25,6 +25,9 @@ class HomeController extends Controller {
 
     // auth: boolean 判断用户登录状态
     ctx.session.auth = true
+    ctx.session.userInfo = {
+      id: userInfo.id
+    }
     ctx.body = {
       successFlag: 'Y',
       errorMsg: '登录成功！',
