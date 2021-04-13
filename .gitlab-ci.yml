@@ -12,6 +12,7 @@ build:server:
     - chmod 600 ~/.ssh/id_rsa_gitlab_token
     - ssh-keyscan $ssh_hostname >> ~/.ssh/known_hosts
     - scp -i ~/.ssh/id_rsa_gitlab_token $ssh_user@$ssh_hostname:~/mp-analyzer/config/config.prod.js config/config.prod.js
+    - scp -i ~/.ssh/id_rsa_gitlab_token $ssh_user@$ssh_hostname:~/mp-analyzer/config/queue.js config/queue.js
     - ls config
     - docker login -u git -p $REGISTRY_PASSWORD docker.internal.feel.ac.cn
     - docker build -t docker.internal.feel.ac.cn/mp-analyzer/server:$CI_COMMIT_SHORT_SHA -f Dockerfile .
