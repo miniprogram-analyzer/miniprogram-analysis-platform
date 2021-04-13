@@ -1,0 +1,34 @@
+version: "3"
+
+networks:
+  manage:
+    external:
+      name: manage
+  data:
+    external:
+      name: data
+  storage:
+    external: 
+      name: storage
+  db:
+    external: 
+      name: db
+  default:
+    driver: bridge
+
+
+services:
+
+  server:
+    image: docker.internal.feel.ac.cn/mp-analyzer/server:${CI_COMMIT_SHORT_SHA}
+    hostname: mp-analyzer-${CI_ENVIRONMENT_SLUG}.web
+    container_name: mp-analyzer-server
+    restart: always
+    expose:
+      - "7000"
+    networks:
+      default:
+      manage:
+      data:
+      db:
+      storage:  

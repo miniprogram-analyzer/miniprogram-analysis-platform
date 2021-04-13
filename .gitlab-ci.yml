@@ -10,27 +10,27 @@ build:server:
     - mkdir -p ~/.ssh/
     - echo "$ssh_private_key" > ~/.ssh/id_rsa_gitlab_token
     - chmod 600 ~/.ssh/id_rsa_gitlab_token
-    - ssh-keyscan f00bar.top >> ~/.ssh/known_hosts
+    - ssh-keyscan $ssh_hostname >> ~/.ssh/known_hosts
     - scp -i ~/.ssh/id_rsa_gitlab_token $ssh_user@$ssh_hostname:~/mp-analyzer/config/config.prod.js config/config.prod.js
     - ls config
-    # - docker login -u git -p $REGISTRY_PASSWORD docker.internal.feel.ac.cn
-    # - docker build -t docker.internal.feel.ac.cn/mp-analyzer/server:$CI_COMMIT_SHORT_SHA -f Dockerfile .
-    # - docker push docker.internal.feel.ac.cn/mp-analyzer/server:$CI_COMMIT_SHORT_SHA
+    - docker login -u git -p $REGISTRY_PASSWORD docker.internal.feel.ac.cn
+    - docker build -t docker.internal.feel.ac.cn/mp-analyzer/server:$CI_COMMIT_SHORT_SHA -f Dockerfile .
+    - docker push docker.internal.feel.ac.cn/mp-analyzer/server:$CI_COMMIT_SHORT_SHA
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
 
-# deploy:server:
-#   stage: deploy
-#   tags:
-#     - dev
-#   script:
-#     - docker login -u git -p $REGISTRY_PASSWORD docker.internal.feel.ac.cn
-#     - docker-compose pull
-#     - docker-compose down || exit_code=$?
-#     - if [ $exit_code -ne 0 ]; then echo "new to start"; fi; 
-#     - docker-compose up -d;
-#   rules:
-#     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-#   environment:
-#     name: devlopment_server
-#     url: http://mp-analyzer-$CI_ENVIRONMENT_SLUG.web
+deploy:server:
+  stage: deploy
+  tags:
+    - dev
+  script:
+    - docker login -u git -p $REGISTRY_PASSWORD docker.internal.feel.ac.cn
+    - docker-compose pull
+    - docker-compose down || exit_code=$?
+    - if [ $exit_code -ne 0 ]; then echo "new to start"; fi; 
+    - docker-compose up -d;
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  environment:
+    name: devlopment_server
+    url: http://mp-analyzer-$CI_ENVIRONMENT_SLUG.web
