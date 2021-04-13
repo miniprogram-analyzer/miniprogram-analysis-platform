@@ -38,6 +38,7 @@
   },
   "scripts": {
     "start": "egg-scripts start --daemon --title=miniprogram-analysis-platform",
+    "start:no-daemon": "egg-scripts start --title=miniprogram-analysis-platform",
     "stop": "egg-scripts stop --title=miniprogram-analysis-platform",
     "dev": "egg-bin dev",
     "stage": "egg-scripts start --daemon --env=stage --title=miniprogram-analysis-platform",

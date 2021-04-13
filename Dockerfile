@@ -9,4 +9,4 @@ RUN cnpm install --production || npm install --production
 
 EXPOSE 7000
 
-CMD [ "npm", "start" ]
+CMD [ "npm", "start:no-daemon" ]
