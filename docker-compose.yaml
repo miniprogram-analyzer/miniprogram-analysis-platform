@@ -35,10 +35,24 @@ services:
     
   wxss-validator:
     image: docker.internal.feel.ac.cn/mp-analyzer/wxss-validator:latest
-    container_name: wxss-validator
+    hostname: mp-analyzer-${CI_ENVIRONMENT_SLUG}.web
+    container_name: mp-analyzer-wxss-validator
     restart: always
     expose:
       - "8080"
+    networks:
+      default:
+      manage:
+      data:
+      db:
+      storage:
+  redis:
+    image: redis:latest
+    hostname: mp-analyzer-${CI_ENVIRONMENT_SLUG}.web
+    container_name: mp-analyzer-redis
+    restart: always
+    expose:
+      - "6379"
     networks:
       default:
       manage:
