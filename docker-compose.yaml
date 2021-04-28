@@ -31,4 +31,17 @@ services:
       manage:
       data:
       db:
-      storage:  
+      storage:
+    
+  wxss-validator:
+    image: docker.internal.feel.ac.cn/mp-analyzer/wxss-validator:latest
+    container_name: wxss-validator
+    restart: always
+    expose:
+      - "8080"
+    networks:
+      default:
+      manage:
+      data:
+      db:
+      storage:
